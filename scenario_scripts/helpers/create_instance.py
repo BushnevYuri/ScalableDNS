@@ -13,26 +13,33 @@ def create_instance(instance_name,image_name, flavor, security_group, networks):
     creds = get_nova_creds()
     nova = nclient.Client(**creds)
 
-    if not nova.keypairs.findall(name="demo-key"):
+    if not nova.keypairs.findall(name='demo-key'):
          with open(os.path.expanduser('~/.ssh/id_rsa.pub')) as fpubkey:
              public_key = fpubkey.read()
-             nova.keypairs.create(name="demo-key", public_key=fpubkey.read())
+             nova.keypairs.create(name='demo-key', public_key=fpubkey.read())
 
     image = nova.images.find(name=image_name)
     flavor = nova.flavors.find(name=flavor)
     group = nova.security_groups.find(name=security_group)
 
-    instance = nova.servers.create(name=instance_name, image=image, flavor=flavor, key_name="demo-key", nics = network)
+    instance = nova.servers.create(name=instance_name, image=image, flavor=flavor, key_name='demo-key', nics = network)
 
     #Poll at 5 second intervals, until the status is no longer 'BUILD'
     status = instance.status
     while status == 'BUILD':
-         time.sleep(5)
-         # Retrieve the instance again so the status field updates
-         instance = nova.servers.get(instance.id)
-         status = instance.status
-         print "status: %s" % status
-    print "End status: %s" % status
+         time.sleep(10)
+         status = nova.servers.get(instance.id).status
+         print 'Image is building...'
+    print 'End status: %s' % status
 
-if __name__ == '__main__':
-    create_instance("test123","cirros-0.3.2-x86_64-uec","m1.tiny","default","69c87b69-aea2-4c09-b3f1-9de576295335")
+def remove_instance(instance_name):
+    creds = get_nova_creds()
+    nova = nclient.Client(**creds)
+    instance = nova.servers.find(name=instance_name)
+    nova.servers.delete(instance.id)
+    print 'Image removed'
+
+if __name__ == '__main__':  #TODO remove after testing
+    create_instance('Ubuntu test','ubuntu_server','m1.small','default','da83df25-6e68-42ca-a656-2aad2f00fcd8')
+    time.sleep(10)
+    remove_instance('Ubuntu test')

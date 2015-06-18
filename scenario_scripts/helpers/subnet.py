@@ -30,7 +30,7 @@ def remove_subnet(network_name):
     neutron.delete_network(network_id)
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  #TODO remove after testing
     subnet_id = create_subnet('my_network', 'my_subnet','10.0.33.0/24')
     print "Subnet %s successfully created" % subnet_id
     time.sleep(10)

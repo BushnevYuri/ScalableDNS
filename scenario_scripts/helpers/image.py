@@ -13,5 +13,6 @@ def create_image(image_name, image_location, disk_format, container_format):
     with open(image_location) as fimage:
         glance.images.create(name=image_name, is_public=True, disk_format=disk_format, container_format=container_format, data=fimage)
 
-if __name__ == '__main__':
-    create_image('ubuntu', '/home/stack/Downloads/precise-server-cloudimg-amd64-disk1.img', 'qcow2', 'bare')
+if __name__ == '__main__':  #TODO remove after testing
+    create_image('ubuntu_server', '/home/stack/Downloads/precise-server-cloudimg-amd64-disk1.img', 'qcow2', 'bare')
+    print "Image 'ubuntu_server' successfully created"
