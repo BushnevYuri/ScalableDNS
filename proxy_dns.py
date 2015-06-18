@@ -1,7 +1,7 @@
-import credentials
-import os
 import socket
+
 import dns.resolver
+
 
 #os.system("neutron agent-list")
 

@@ -1,7 +1,10 @@
 import os
 import time
+
 import novaclient.v3 as nvclient
-from credentials import get_nova_creds
+
+from settings.credentials import get_nova_creds
+
 
 #Works!  nova boot --flavor m1.tiny --image cirros-0.3.3-x86_64 --nic net-id=ea3da9bb-b2f8-41f6-a85d-063ffbc2b2f3 --security-group default --key-name admin-key demo-instance7
 
