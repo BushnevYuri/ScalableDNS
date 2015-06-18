@@ -1,0 +1,6 @@
+Images:
+nova image-list
+
+
+Instances creation:
+nova keypair-list
