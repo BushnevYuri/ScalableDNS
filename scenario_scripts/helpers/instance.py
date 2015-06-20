@@ -38,19 +38,28 @@ def create_instance(instance_name,image_name, flavor, security_group, networks):
 
 
     secgroup = nova.security_groups.find(name='default')
-    nova.security_group_rules.create(secgroup.id,
+
+    try:
+        nova.security_group_rules.create(secgroup.id,
                                ip_protocol='tcp',
                                from_port=22,
                                to_port=22)
-    nova.security_group_rules.create(secgroup.id,
+        print 'Security tcp group rules successfully added'
+    except:
+        print
+
+    try:
+        nova.security_group_rules.create(secgroup.id,
                                ip_protocol='icmp',
                                from_port=-1,
                                to_port=-1)
-    print 'Security group rules successfully added'
+        print 'Security icmp group rules successfully added'
+    except:
+        print
 
     nova.floating_ips.list()
     floating_ip = nova.floating_ips.create()
-    instance = nova.servers.find(name='Ubuntu test')
+    instance = nova.servers.find(name=instance_name)
     instance.add_floating_ip(floating_ip)
 
     print "Floating ip %s added to instance" % floating_ip.ip
@@ -66,5 +75,5 @@ def remove_instance(instance_name):
 
 if __name__ == '__main__':  #TODO remove after testing
     create_instance('Ubuntu test','ubuntu_server','m1.small','default','e5a9c538-9d94-4738-ad3c-87040685692a')
-    #time.sleep(10)
-    #remove_instance('Ubuntu test')
+    time.sleep(10)
+    remove_instance('Ubuntu test')
