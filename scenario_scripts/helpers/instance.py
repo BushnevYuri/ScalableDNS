@@ -74,6 +74,6 @@ def remove_instance(instance_name):
     print 'Image removed'
 
 if __name__ == '__main__':  #TODO remove after testing
-    create_instance('Ubuntu test','ubuntu_server','m1.small','default','e5a9c538-9d94-4738-ad3c-87040685692a')
+    create_instance('cirros-0.3.2-x86_64-uec','ubuntu_server','m1.small','default','4548790a-d4b9-4796-abd4-efda30de21a4')
     time.sleep(10)
     remove_instance('Ubuntu test')

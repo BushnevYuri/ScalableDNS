@@ -26,17 +26,20 @@ def purge_dns(router_id):
     remove_router(router_id)
 
 if __name__ == '__main__':  #TODO remove after testing
-    router_id = create_router(BASE_ROUTER, EXTERNAL_NETWORK_ID)
-    subnet_id = create_subnet(NETWORK_NAME, SUBNET_NAME, SUBNET_ADDRESS, interface_router_id=router_id)
-    instance_name = 'dns_%s' % time.time()
-    create_instance(instance_name, DNS_SERVER_IMAGE, DNS_SERVERS_FLAVOR, DNS_SECURITY_GROUP, subnet_id)
-    DNS_SERVERS.append(instance_name)
+    try:
+        router_id = create_router(BASE_ROUTER, EXTERNAL_NETWORK_ID)
+        subnet_id = create_subnet(NETWORK_NAME, SUBNET_NAME, SUBNET_ADDRESS, interface_router_id=router_id)
+        instance_name = 'dns_%s' % time.time()
+        create_instance(instance_name, DNS_SERVER_IMAGE, DNS_SERVERS_FLAVOR, DNS_SECURITY_GROUP, subnet_id)
+        DNS_SERVERS.append(instance_name)
 
-    #TODO deploy dns on created node or create predifined image with dns server
+        #TODO deploy dns on created node or create predifined image with dns server
 
-    purge_dns(router_id)
+        #while (True):
+        #    time.sleep(10)
 
-
+    finally:
+       purge_dns(router_id)
 
 
 
