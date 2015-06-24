@@ -64,18 +64,50 @@ def create_load_balancer(name, load_balance_method, protocol, subnet):
     os.system('neutron lb-pool-create --lb-method %s --name %s --protocol %s --subnet-id %s --provider haproxy > %s' % (load_balance_method, name, protocol, subnet, TEMP_HELPER_FILE))
     time.sleep(5)
     load_balaner_pool_id = get_id_of_created_instance()
-    os.system('neutron lb-healthmonitor-create --delay 3 --type %s --max-retries 3 --timeout 3 > %s' % (protocol,TEMP_HELPER_FILE))
+    os.system('neutron lb-healthmonitor-create --delay 3 --type %s --max-retries 3 --timeout 3 > %s' % (protocol, TEMP_HELPER_FILE))
+    time.sleep(5)
     healthmonitor_id = get_id_of_created_instance()
+    os.system('neutron lb-healthmonitor-associate %s %s' % (healthmonitor_id, name))
     print 'Load balancer created, id: %s, healthmonitor_id: %s' %(load_balaner_pool_id, healthmonitor_id)
     return load_balaner_pool_id, healthmonitor_id
 
+def remove_load_balancer(load_balancer_pool, health_monitor=False):
+    if health_monitor:
+        os.system('neutron lb-healthmonitor-disassociate %s %s' % (health_monitor,load_balancer_pool))
+        time.sleep(1)
+        os.system('neutron lb-healthmonitor-delete %s' % health_monitor)
+        time.sleep(3)
+        print 'Health-monitor removed'
+    os.system('neutron lb-pool-delete %s' % load_balancer_pool)
+    time.sleep(3)
+
 def add_member_to_load_balancer_pool(web_server_ip, load_balancer_pool_name, port):
     os.system('neutron lb-member-create --address  %s --protocol-port %s %s' % (web_server_ip, port, load_balancer_pool_name))
+    time.sleep(3)
+
+def create_load_balancer_virtual_ip(virtual_ip_name, port, protocol, subnet_id, load_balancer_pool_name):
+    os.system('neutron lb-vip-create --name %s --protocol-port %s --protocol %s --subnet-id %s %s' % (virtual_ip_name, port, protocol, subnet_id, load_balancer_pool_name))
+    time.sleep(3)
+
+def remove_load_balancer_virtual_ip(virtual_ip_name):
+    os.system('neutron lb-vip-delete --name %s' % virtual_ip_name)
+    time.sleep(3)
+
+
+def get_list_of_subnets():
+    subnets = neutron.list_subnets()
+    print subnets
+    return subnets
+
+
+
+
+
 
 def get_id_of_created_instance():
     id = None
     regex = re.compile("(\| id \s*\|\s)(\S*)")
-    with open("/tmp/temp") as f:
+    with open(TEMP_HELPER_FILE) as f:
         for line in f:
             result = regex.search(line)
             if result:
@@ -96,5 +128,11 @@ if __name__ == '__main__':  #TODO remove after testing
     # time.sleep(10)
     # remove_router(router_id)
     #remove_subnet('dns_network', interface_router_id='d5f981a1-0fa4-41cf-ac80-18f2300833b9')
-    #create_load_balancer('mypool', 'SOURCE_IP', 'TCP', 'a030f2ba-a6b6-41b7-9694-46acc1937fea')
-    add_member_to_load_balancer_pool ('10.0.33.1', 'mypool', 53)
+
+    # load_balaner_pool_id, healthmonitor_id = create_load_balancer('mypool', 'SOURCE_IP', 'TCP', 'a21f4a1d-aa05-440e-ab47-5657c014d124')
+    # add_member_to_load_balancer_pool ('10.0.33.1', 'mypool', 53)
+    # create_load_balancer_virtual_ip('vip', 53, 'TCP', 'a21f4a1d-aa05-440e-ab47-5657c014d124', 'mypool')
+    # remove_load_balancer_virtual_ip('vip')
+    # remove_load_balancer('mypool', healthmonitor_id)
+    get_list_of_subnets()
+

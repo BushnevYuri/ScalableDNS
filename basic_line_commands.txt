@@ -4,3 +4,8 @@ nova image-list
 
 Instances creation:
 nova keypair-list
+
+Ssh not strict connection :
+chmod 600 /tmp/openstack_keys/demo-key9.pem
+ssh -i /tmp/openstack_keys/demo-key9.pem -o "StrictHostKeyChecking no" ubuntu@172.24.4.5
+

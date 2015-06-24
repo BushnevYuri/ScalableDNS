@@ -4,14 +4,11 @@ import demo_user_credentials
 from novaclient.v1_1 import client as nclient
 from services_credentials import get_nova_creds
 
-def create_instance(instance_name,image_name, flavor, security_group, networks):
+def create_instance(instance_name,image_name, flavor, security_group, networks, key_name='ssh_key'):
     network = [{'net-id': networks}]
 
     creds = get_nova_creds()
     nova = nclient.Client(**creds)
-
-    keypair = None
-    key_name = 'demo-key9'
 
     openstack_keys_location = "/tmp/openstack_keys/"
     try:
@@ -61,8 +58,9 @@ def create_instance(instance_name,image_name, flavor, security_group, networks):
     floating_ip = nova.floating_ips.create()
     instance = nova.servers.find(name=instance_name)
     instance.add_floating_ip(floating_ip)
-
+    instance_ip = instance.networks['dns_network'][0]
     print "Floating ip %s added to instance" % floating_ip.ip
+    return instance_ip
 
 
 
@@ -74,6 +72,6 @@ def remove_instance(instance_name):
     print 'Image removed'
 
 if __name__ == '__main__':  #TODO remove after testing
-    create_instance('cirros-0.3.2-x86_64-uec','ubuntu_server','m1.small','default','4548790a-d4b9-4796-abd4-efda30de21a4')
+    create_instance('Ubuntu test','ubuntu_server','m1.small','default','e5a9c538-9d94-4738-ad3c-87040685692a')
     time.sleep(10)
     remove_instance('Ubuntu test')
