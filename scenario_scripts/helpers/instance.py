@@ -4,21 +4,23 @@ import demo_user_credentials
 from novaclient.v1_1 import client as nclient
 from services_credentials import get_nova_creds
 
-def create_instance(instance_name,image_name, flavor, security_group, networks, key_name='ssh_key'):
+def create_instance(instance_name,image_name, flavor, security_group, networks, subnet_name, key_name='some_key3'):
     network = [{'net-id': networks}]
 
     creds = get_nova_creds()
     nova = nclient.Client(**creds)
 
     openstack_keys_location = "/tmp/openstack_keys/"
+    openstack_key_file = openstack_keys_location + key_name + '.pem'
     try:
         os.stat(openstack_keys_location)
     except:
         os.mkdir(openstack_keys_location)
-    if not nova.keypairs.findall(name=key_name):
-          os.system("nova keypair-add %s > %s/%s.pem" % (key_name, openstack_keys_location, key_name))
-          os.system("chmod 600 %s/%s.pem" % (openstack_keys_location, key_name))
+    if (not nova.keypairs.findall(name=key_name)) or (not os.stat(openstack_key_file)):
+          os.system("nova keypair-add %s > %s%s.pem" % (key_name, openstack_keys_location, key_name))
+          os.system("chmod 600 %s%s.pem" % (openstack_keys_location, key_name))
 
+    temp_key = nova.keypairs.findall(name=key_name) #TODO remove(for testing)
     image = nova.images.find(name=image_name)
     flavor = nova.flavors.find(name=flavor)
     group = nova.security_groups.find(name=security_group).name
@@ -58,9 +60,10 @@ def create_instance(instance_name,image_name, flavor, security_group, networks, 
     floating_ip = nova.floating_ips.create()
     instance = nova.servers.find(name=instance_name)
     instance.add_floating_ip(floating_ip)
-    instance_ip = instance.networks['dns_network'][0]
+    print instance.networks
+    instance_ip = instance.networks[subnet_name][0]
     print "Floating ip %s added to instance" % floating_ip.ip
-    return instance_ip
+    return instance_ip, floating_ip, openstack_key_file
 
 
 
@@ -72,6 +75,6 @@ def remove_instance(instance_name):
     print 'Image removed'
 
 if __name__ == '__main__':  #TODO remove after testing
-    create_instance('Ubuntu test','ubuntu_server','m1.small','default','e5a9c538-9d94-4738-ad3c-87040685692a')
-    time.sleep(10)
-    remove_instance('Ubuntu test')
+    create_instance('test','ubuntu_server','m1.small','default','9b0bbc98-fd65-4f77-acd4-e1380b49267b','test')
+    #time.sleep(10)
+    #remove_instance('Ubuntu test')
