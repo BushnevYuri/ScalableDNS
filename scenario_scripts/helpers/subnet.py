@@ -86,8 +86,17 @@ def add_member_to_load_balancer_pool(web_server_ip, load_balancer_pool_name, por
     time.sleep(3)
 
 def create_load_balancer_virtual_ip(virtual_ip_name, port, protocol, subnet_id, load_balancer_pool_name):
-    os.system('neutron lb-vip-create --name %s --protocol-port %s --protocol %s --subnet-id %s %s' % (virtual_ip_name, port, protocol, subnet_id, load_balancer_pool_name))
+    os.system('neutron lb-vip-create --name %s --protocol-port %s --protocol %s --subnet-id %s %s > %s' % (virtual_ip_name, port, protocol, subnet_id, load_balancer_pool_name, TEMP_HELPER_FILE))
     time.sleep(3)
+    ip = None
+    regex = re.compile("(\| address \s*\|\s)(\S*)")
+    with open(TEMP_HELPER_FILE) as f:
+        for line in f:
+            result = regex.search(line)
+            if result:
+                ip = result.group(2)
+    if not ip: print 'Couldn\'t get id of created instance'
+    return ip
 
 def remove_load_balancer_virtual_ip(virtual_ip_name):
     os.system('neutron lb-vip-delete --name %s' % virtual_ip_name)
@@ -96,13 +105,7 @@ def remove_load_balancer_virtual_ip(virtual_ip_name):
 
 def get_list_of_subnets():
     subnets = neutron.list_subnets()
-    print subnets
     return subnets
-
-
-
-
-
 
 def get_id_of_created_instance():
     id = None
